@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify, render_template
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
+from PIL import ImageFile
 import numpy as np
 import os
-
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 app = Flask(__name__)
 model = load_model('skin_disease_model.h5')
 
