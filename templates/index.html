@@ -19,6 +19,10 @@
             e.preventDefault();
 
             const file = document.getElementById("image").files[0];
+            if (!file) {
+    alert("Please select an image");
+    return;
+            }
             const formData = new FormData();
             formData.append("image", file);
 
