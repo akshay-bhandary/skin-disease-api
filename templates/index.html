@@ -25,18 +25,24 @@
             }
             const formData = new FormData();
             formData.append("image", file);
+try {
+    const response = await fetch("/predict", {
+        method: "POST",
+        body: formData
+    });
 
-            const response = await fetch("/predict", {
-                method: "POST",
-                body: formData
+    const text = await response.text();
+    alert(text);
+
+    const data = JSON.parse(text);
+
+    document.getElementById("result").innerHTML =
+        "Prediction: " + data.prediction +
+        "<br>Confidence: " + (data.confidence * 100).toFixed(2) + "%";
+} catch (error) {
+    alert("Error: " + error.message);
+}
             });
-
-            const data = await response.json();
-
-            document.getElementById("result").innerHTML =
-                "Prediction: " + data.prediction +
-                "<br>Confidence: " + (data.confidence * 100).toFixed(2) + "%";
-        });
     </script>
 </body>
 </html>
