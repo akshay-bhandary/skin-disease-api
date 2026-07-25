@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 import numpy as np
@@ -12,7 +12,7 @@ class_names = ['Atopic Dermatitis', 'Basal Cell Carcinoma', 'Melanocytic Nevi',
 
 @app.route('/')
 def home():
-    return "Skin Disease Detection API is running"
+    return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
