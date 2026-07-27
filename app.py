@@ -1,12 +1,19 @@
 from flask import Flask, request, jsonify, render_template
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import image
-from PIL import ImageFile
 import numpy as np
+from PIL import Image
 import os
-ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+try:
+    import tflite_runtime.interpreter as tflite
+except ImportError:
+    import tensorflow.lite as tflite
+
 app = Flask(__name__)
-model = load_model('skin_disease_model.h5')
+
+interpreter = tflite.Interpreter(model_path='skin_disease_model.tflite')
+interpreter.allocate_tensors()
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
 
 class_names = ['Atopic Dermatitis', 'Basal Cell Carcinoma', 'Melanocytic Nevi',
                'Melanoma', 'Warts Molluscum', 'Eczema', 'Benign Keratosis']
@@ -21,11 +28,14 @@ def predict():
     img_path = 'temp.jpg'
     file.save(img_path)
 
-    img = image.load_img(img_path, target_size=(224, 224))
-    img_array = image.img_to_array(img) / 255.0
+    img = Image.open(img_path).convert('RGB').resize((224, 224))
+    img_array = np.array(img, dtype=np.float32) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 
-    prediction = model.predict(img_array)
+    interpreter.set_tensor(input_details[0]['index'], img_array)
+    interpreter.invoke()
+    prediction = interpreter.get_tensor(output_details[0]['index'])
+
     predicted_class = class_names[np.argmax(prediction)]
     confidence = float(np.max(prediction))
 
